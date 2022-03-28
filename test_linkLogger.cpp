@@ -4,6 +4,12 @@
 #include <iterator>
 #include "functions.h"
 
+//HOW TO USE:
+//-add your own TEST_CASE()  down below
+//-each TEST_CASE() should have SECTION() areas that seperate different test cases. 
+//-each SECTION() has a REQUIRE statement that will test if two value are the same, if they are then the test case passes, else it fails
+//-all test cases should pass, if they do not something is wrong!
+
 TEST_CASE("Testing removal behaviour")
 {
 	SECTION("Testing 1 normal removal of link to empty")
