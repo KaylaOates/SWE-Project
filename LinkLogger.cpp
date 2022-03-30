@@ -35,6 +35,19 @@ bool linkLogger::removeLink(meeting* link) //Remove a link by going through the 
 	return true;
 }
 
+void linkLogger::addLink(meeting* newMeeting) //Add a link by adding it to the end of the CSV file
+{
+    //checks for CSV, creates one if it does not already exist
+	fstream linksCSV("links.csv");
+    if (!linksCSV) {
+        ofstream linksCSV("links.csv");
+        linksCSV.close();
+    }
+    linksCSV.open("links.csv", std::ios::out | std::ios::app); //append the CSV
+    linksCSV << newMeeting->url << ", " << newMeeting->info << ", " << newMeeting->time << ", " << newMeeting->date << "\n"; //add info from new meeting into CSV file
+    linksCSV.close();
+}
+
 void linkLogger::updateCSV()
 {
 	ofstream linksCSV("csv/links.csv", std::ios::out | std::ios::trunc);
@@ -67,6 +80,7 @@ void linkLogger::insertMeeting(string url, string info, string time, string date
 	cnt = cnt + 1;
 	meeting* newMeeting = new meeting(url, info, time, date);
 	list.push_back(newMeeting);
+	this->addLink(newMeeting);
 }
 
 meeting* linkLogger::getMeeting(string url_)
