@@ -42,6 +42,7 @@ public:
 	void insertMeeting(string url, string info, string time, string date);
 	meeting* getMeeting(string url_);
 	bool removeLink(meeting* link);
+	void addLink(meeting* newMeeting);
 	void updateCSV();
 	unsigned int getCount();
 };
