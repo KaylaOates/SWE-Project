@@ -44,7 +44,7 @@ void linkLogger::addLink(meeting* newMeeting) //Add a link by adding it to the e
         linksCSV.close();
     }
     linksCSV.open("links.csv", std::ios::out | std::ios::app); //append the CSV
-    linksCSV << newMeeting->url << ", " << newMeeting->info << ", " << newMeeting->time << ", " << newMeeting->date << "\n"; //add info from new meeting into CSV file
+    linksCSV << newMeeting->url << ", " << newMeeting->info << ", " << newMeeting->time << ", " << newMeeting->date << "," << newMeeting->password << "\n"; //add info from new meeting into CSV file
     linksCSV.close();
 }
 
@@ -63,6 +63,8 @@ void linkLogger::updateCSV()
 			temp.append(list[i]->getDate());
 			temp.append(",");
 			temp.append(list[i]->getTime());
+      temp.append(",");
+      temp.append(list[i]->getPassword());
 			temp.append(",\n");
 			linksCSV << temp;
 		}
@@ -75,12 +77,12 @@ void linkLogger::openURL(string& URL)
 	ShellExecuteA(NULL, "open", URL.c_str(), NULL, NULL, SW_SHOWNORMAL);
 }
 
-void linkLogger::insertMeeting(string url, string info, string time, string date)
+void linkLogger::insertMeeting(string url, string info, string time, string date,string password)
 {
 	cnt = cnt + 1;
-	meeting* newMeeting = new meeting(url, info, time, date);
+	meeting* newMeeting = new meeting(url, info, time, date,password);
 	list.push_back(newMeeting);
-	this->addLink(newMeeting);
+  this->addLink(newMeeting);
 }
 
 meeting* linkLogger::getMeeting(string url_)
@@ -119,6 +121,10 @@ void meeting::setDate(string newDate)
 {
 	this->date = newDate;
 }
+void meeting::setPassword(string password)
+{
+	this->password = password;
+}
 string meeting::getURL()
 {
 	return url;
@@ -135,3 +141,9 @@ string meeting::getDate()
 {
 	return date;
 }
+
+string meeting::getPassword()
+{
+	return password;
+}
+
