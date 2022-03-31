@@ -32,6 +32,7 @@ public:
 	string getTime();
 	string getDate();
 	string getPassword();
+};
 class linkLogger
 {
 private:
