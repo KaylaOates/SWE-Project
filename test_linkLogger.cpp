@@ -128,4 +128,28 @@ TEST_CASE("Testing Get function")
 		string get_url = meetingList->getMeeting("https://ufl.zoom.us/j/99700198181")->getURL();
 		REQUIRE(get_url == "https://ufl.zoom.us/j/99700198181");
 	}
+	SECTION("Testing get info") {
+		linkLogger* meetingList = new linkLogger();
+		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198181", "test", "0;00", "00/00/0000", "123");
+		string get_url = meetingList->getMeeting("https://ufl.zoom.us/j/99700198181")->getInfo();
+		REQUIRE(get_url == "https://ufl.zoom.us/j/99700198181");
+	}
+	SECTION("Testing get time") {
+		linkLogger* meetingList = new linkLogger();
+		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198181", "test", "0;00", "00/00/0000", "123");
+		string get_url = meetingList->getMeeting("https://ufl.zoom.us/j/99700198181")->getTime();
+		REQUIRE(get_url == "https://ufl.zoom.us/j/99700198181");
+	}
+	SECTION("Testing get date") {
+		linkLogger* meetingList = new linkLogger();
+		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198181", "test", "0;00", "00/00/0000", "123");
+		string get_url = meetingList->getMeeting("https://ufl.zoom.us/j/99700198181")->getDate();
+		REQUIRE(get_url == "https://ufl.zoom.us/j/99700198181");
+	}
+	SECTION("Testing get password") {
+		linkLogger* meetingList = new linkLogger();
+		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198181", "test", "0;00", "00/00/0000", "123");
+		string get_url = meetingList->getMeeting("https://ufl.zoom.us/j/99700198181")->getPassword();
+		REQUIRE(get_url == "https://ufl.zoom.us/j/99700198181");
+	}
 }
