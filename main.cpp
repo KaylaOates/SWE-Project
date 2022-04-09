@@ -2,17 +2,19 @@
 #include "catch2/catch.hpp"
 #include "TextBox.cpp"
 #include "LinkLogger.h"
+#include "functions.h"
 #include <SFML/Graphics.hpp>
+#include <stdlib.h> 
 
 int main(int argc, char* const argv[])
 {
 	
-    //running test before anything happens
-    //Make sure that you create the linkLogger instance before this line of code as it completely writes over the file, so all the data from before will be lost.
-    int result = Catch::Session().run(argc, argv);
+
 	
-	    //declare all window, shape, text, font objects here
-    sf::RenderWindow window(sf::VideoMode(1480, 1024), "Link Logger");
+	//declare all window, shape, text, font objects here
+    sf::RenderWindow window;
+    sf::RenderWindow userWindow(sf::VideoMode(600, 480), "Select User Profile");
+    bool userBoxOpen = true;
 
     //-----------------------------------------------------TEXT BOXES------------------------------------------------------------//
 
@@ -59,31 +61,194 @@ int main(int argc, char* const argv[])
     textDisplayT.setString("Time");
     bool firstClickT = true;
 
+
+    sf::String stringDisplayU;
+    sf::Text textDisplayU;
+    bool takeInputU = false;
+    textDisplayU.setFont(font);
+    textDisplayU.setCharacterSize(30);
+    textDisplayU.setFillColor(sf::Color::Black);
+    textDisplayU.setPosition(70, 128);
+    textDisplayU.setString("User Profile Name");
+    bool firstClickU = true;
+
     //-----------------------------------------------------IMAGE IMPORTS---------------------------------------------------------//
 
     ImportImage Background("Background", -58, -58);
     ImportImage NoLogoBackground("NoLogoBackground", -58, -58);
     ImportImage AddLink("AddLink", 520, 30);
     ImportImage ClickedAddLink("ClickedAddLink", 520, 30);
-        bool CheckClickedAddLink = false;
+    bool CheckClickedAddLink = false;
     ImportImage CalendarView("CalendarView", 990, 30);
     ImportImage ClickedCalendarView("ClickedCalendarView", 990, 30);
-        bool CheckClickedCalendarView = false;
+    bool CheckClickedCalendarView = false;
     ImportImage ListView("ListView", 50, 30);
     ImportImage ClickedListView("ClickedListView", 50, 30);
-        bool CheckClickedListView = false;
+    bool CheckClickedListView = false;
     ImportImage LinkAdressInsert("LinkAdressInsert", 220, 300);
     ImportImage Description("Description", 220, 450);
     ImportImage Password("Password", 220, 600);
     ImportImage Time("Time", 220, 750);
     ImportImage SaveUnclicked("SaveUnclicked", 600, 885);
     ImportImage SaveClicked("SaveClicked", 600, 885);
-        bool CheckSaveClicked = false;
+    bool CheckSaveClicked = false;
 
+    ImportImage userBox("UsersB", 40, 100);
+    ImportImage SaveClicked2("SaveUnclicked", 170, 250);
+    string userProfParameter;
+    bool saveClicked2U = false;
+    
+    
+    
+    
+    //---------------------------------------------------------------MAIN PROGRAM LOOP-------------------------------------------------------------------//
+    bool testRan = false;
+    int textTracker = 0;
 
-    while (window.isOpen())
+    while (window.isOpen() || userWindow.isOpen())
     {
         sf::Event event;
+        if (userBoxOpen)
+        {
+            while (userWindow.pollEvent(event))
+            {
+                if (event.type == sf::Event::Closed)
+                {
+                    userWindow.close();
+                    window.close();
+                }
+
+                sf::Vector2i mouseP = sf::Mouse::getPosition(userWindow);
+                if (event.type == sf::Event::MouseButtonPressed)
+                {
+                    if (event.mouseButton.button == sf::Mouse::Left)
+                    {
+                        if (SaveClicked2.getSprite().getGlobalBounds().contains(mouseP.x, mouseP.y)) //if the SAVE button is clicked
+                        {
+                            saveClicked2U = true;
+                            userProfParameter = stringDisplayU; //take the user input as a string that will be the parameter for the link logger class
+
+                            //checking if test was chosen to be ran
+                            if ((userProfParameter == "test" || userProfParameter == "Test" || userProfParameter == "TEST" || userProfParameter == "test mode" || userProfParameter == "testing" || userProfParameter == "run tests") && testRan == false)
+                            {
+                                testRan = true;
+                                int result = Catch::Session().run(argc, argv);
+                            }
+                            //checking if an invalid name has been chose
+                            else if ((userProfParameter == "test" || userProfParameter == "Test" || userProfParameter == "TEST" || userProfParameter == "test mode" || userProfParameter == "testing" || userProfParameter == "run tests") && testRan == true)
+                            {
+                                stringDisplayU.clear();
+                                textDisplayU.setString("Invalid Name!");
+                                firstClickU = true;
+                            }
+                            //checking if the user input is all spaces or an empty string, which is invalid
+                            else if (userProfParameter.find_first_not_of(' ') == std::string::npos || userProfParameter == "")
+                            {
+                                stringDisplayU.clear();
+                                textDisplayU.setString("Invalid Name!");
+                                firstClickU = true;
+                            }
+                            //closing the user profile window and then opening the main program window and making the link logger class with the correct name parameter
+                            else
+                            {
+                                userBoxOpen = false;
+                                userWindow.close();
+                                window.create(sf::VideoMode(1480, 1024), "Link Logger");
+                                linkLogger* meetingList = new linkLogger(userProfParameter);
+                            }
+                        }
+                        //clearing the box if something other than the SAVE button or textbox was clicked
+                        if (!userBox.getSprite().getGlobalBounds().contains(mouseP.x, mouseP.y) && !SaveClicked2.getSprite().getGlobalBounds().contains(mouseP.x, mouseP.y))
+                        {
+                            takeInputU = false;
+                            stringDisplayU.clear();
+                            firstClickU = true;
+                            textTracker = 0;
+                        }
+                        //if the textbox is clicked allow the user to input keys
+                        else if (userBox.getSprite().getGlobalBounds().contains(mouseP.x, mouseP.y))
+                        {
+                            takeInputU = true;
+                            if (firstClickU)
+                            {
+                                textDisplayU.setString("");
+                                firstClickU = false;
+                            }
+                        }
+                    }
+                }
+                //taking in user input into the text box and updating it in real time
+                if (event.type == sf::Event::TextEntered)
+                {
+                    //ONLY TAKE INPUT IN IF ALLOWED I.E. WHEN THE SEARCH BAR HAS BEEN SELECTED
+                    if (takeInputU == true)
+                    {
+                        //CHECKING IF THE CHARACTER TYPED IS VALID UNICODE
+                        if (event.text.unicode >= 32 && event.text.unicode <= 127)
+                        {
+                            stringDisplayU += event.text.unicode;
+                            textDisplayU.setString(stringDisplayU.substring(textTracker,stringDisplayU.getSize()));
+                            //allows for the text to wrap in the textbox so if the string gets larger than the textbox, the first character will not be displayed until it fits in the textbox
+                            while (textDisplayU.getLocalBounds().width >= userBox.getSprite().getLocalBounds().width - 60)
+                            {
+                                textTracker++;
+                                string tempString = textDisplayU.getString();
+                                tempString = stringDisplayU.substring(textTracker, tempString.size());
+                                textDisplayU.setString(tempString);
+                            }
+                        }
+                        //CHECKING FOR BACKSPACE, WHICH DELETES THE LAST CHARACTER TYPED IF THERE IS A LETTER IN THE SEARCH BAR
+                        else if (event.text.unicode == 8)
+                        {
+                            if (!stringDisplayU.isEmpty())
+                            {
+                                stringDisplayU.erase(stringDisplayU.getSize() - 1, 1);
+                                textDisplayU.setString(stringDisplayU);
+                            }
+                            
+                            if(textTracker > 0) //if characters have been wrapped, so text tracker is larger than its default, then we will decrease text tracker so that the string unwraps
+                            {
+                                textTracker--;
+                                string tempString = textDisplayU.getString();
+                                tempString = stringDisplayU.substring(textTracker, tempString.size());
+                                textDisplayU.setString(tempString);
+                            }
+                        }
+                    }
+                }
+                //checking if the for keyboard presses
+                if (event.type == sf::Event::KeyPressed)
+                {
+                    //If the enter key is pressed, act as if the save button has been pressed.
+                    if (event.key.code == sf::Keyboard::Return)
+                    {
+                        saveClicked2U = true;
+                        userProfParameter = stringDisplayU; //take the user input as a string that will be the parameter for the link logger class
+
+                        //checking if test was chosen to be ran
+                        if ((userProfParameter == "test" || userProfParameter == "Test" || userProfParameter == "TEST" || userProfParameter == "test mode" || userProfParameter == "testing" || userProfParameter == "run tests") && testRan == false)
+                        {
+                            testRan = true;
+                            int result = Catch::Session().run(argc, argv);
+                        }
+                        //checking if an invalid name has been chose
+                        else if ((userProfParameter == "test" || userProfParameter == "Test" || userProfParameter == "TEST" || userProfParameter == "test mode" || userProfParameter == "testing" || userProfParameter == "run tests") && testRan == true)
+                        {
+                            textDisplayU.setString("Invalid Name!");
+                            firstClickU = true;
+                        }
+                        //closing the user profile window and then opening the main program window and making the link logger class with the correct name parameter
+                        else
+                        {
+                            userBoxOpen = false;
+                            userWindow.close();
+                            window.create(sf::VideoMode(1480, 1024), "Link Logger");
+                            linkLogger* meetingList = new linkLogger(userProfParameter);
+                        }
+                    }
+                }
+            }
+        }
         while (window.pollEvent(event))
         {
             
@@ -321,7 +486,18 @@ int main(int argc, char* const argv[])
             window.draw(CalendarView.getSprite());
         else
             window.draw(ClickedCalendarView.getSprite());
-
+        if (userBoxOpen)
+        {
+            userWindow.clear(sf::Color::White);
+            userWindow.draw(SaveClicked2.getSprite());
+            userWindow.draw(userBox.getSprite());
+            if(takeInputU == false)
+            {
+                textDisplayU.setString("User Profile Name");
+            }
+            userWindow.draw(textDisplayU);
+            userWindow.display();
+        }
 
         window.display();
     }
