@@ -2,12 +2,22 @@
 linkLogger::linkLogger()
 {
 	this->cnt = 0;
+	user = "csv/default.csv";
 }
 
-linkLogger::linkLogger(vector<meeting*> newList, int cnt)
+linkLogger::linkLogger(vector<meeting*> newList, int cnt, string user_)
 {
 	this->list = newList;
 	this->cnt = cnt;
+	user_ = "csv/" + user_ + ".csv";
+	user = user_;
+}
+
+linkLogger::linkLogger(string user_)
+{
+	this->cnt = 0;
+	user_ = "csv/" + user_ + ".csv";
+	user = user_;
 }
 
 linkLogger::~linkLogger()//desructor
@@ -38,19 +48,19 @@ bool linkLogger::removeLink(meeting* link) //Remove a link by going through the 
 void linkLogger::addLink(meeting* newMeeting) //Add a link by adding it to the end of the CSV file
 {
     //checks for CSV, creates one if it does not already exist
-	fstream linksCSV("links.csv");
+	fstream linksCSV(user);
     if (!linksCSV) {
-        ofstream linksCSV("links.csv");
+        ofstream linksCSV(user);
         linksCSV.close();
     }
-    linksCSV.open("links.csv", std::ios::out | std::ios::app); //append the CSV
-    linksCSV << newMeeting->url << ", " << newMeeting->info << ", " << newMeeting->time << ", " << newMeeting->date << "," << newMeeting->password << "\n"; //add info from new meeting into CSV file
+    linksCSV.open(user, std::ios::out | std::ios::app); //append the CSV
+	linksCSV << newMeeting->getURL() << ", " << newMeeting->getInfo() << ", " << newMeeting->getTime() << ", " << newMeeting->getDate() << "," << newMeeting->getPassword() << "\n"; //add info from new meeting into CSV file
     linksCSV.close();
 }
 
 void linkLogger::updateCSV()
 {
-	ofstream linksCSV("csv/links.csv", std::ios::out | std::ios::trunc);
+	ofstream linksCSV(user, std::ios::out | std::ios::trunc);
 	if (linksCSV.is_open())
 	{
 		for (int i = 0; i < cnt; i++)
@@ -100,6 +110,10 @@ meeting* linkLogger::getMeeting(string url_)
 unsigned int linkLogger::getCount()
 {
 	return cnt;
+}
+string linkLogger::getUser()
+{
+	return user;
 }
 
 void meeting::setURL(string newUrl)
