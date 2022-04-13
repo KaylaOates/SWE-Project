@@ -2,6 +2,7 @@
 #include <iostream>
 #include<vector>
 #include<string>
+#include <sstream>
 #include <fstream>
 #include <windows.h>
 #include <shellapi.h>
@@ -21,6 +22,14 @@ public:
 		this->time = time;
 		this->date = date;
 		this->password = password;
+	}
+	meeting()
+	{
+		url = "";
+		info = "";
+		time = "";
+		date = "";
+		password = "";
 	}
 	void setURL(string newUrl);
 	void setInfo(string newInfo);

@@ -5,6 +5,8 @@
 #include "functions.h"
 #include <SFML/Graphics.hpp>
 #include <stdlib.h> 
+///////////////////////////////////TODO: MAKE SURE THE CSV WRITING WORKS PROPERLY AND THE LINKLOGGER GRABS THE MEETINGS IN THE CSV AND ADDS THEM TO ITS VECTOR IN THE CONSTRUCTOR.////////////////////////////////////////////////////////
+
 
 int main(int argc, char* const argv[])
 {
@@ -15,6 +17,8 @@ int main(int argc, char* const argv[])
     sf::RenderWindow window;
     sf::RenderWindow userWindow(sf::VideoMode(600, 480), "Select User Profile");
     bool userBoxOpen = true;
+    linkLogger tempLinkLogger = linkLogger();
+    linkLogger* meetingList = &tempLinkLogger;
 
     //-----------------------------------------------------TEXT BOXES------------------------------------------------------------//
 
@@ -30,6 +34,7 @@ int main(int argc, char* const argv[])
     textDisplayURL.setPosition(300, 330);
     textDisplayURL.setString("Insert URL");
     bool firstClickURL = true;
+    int textTrackerURL = 0;
 
     bool takeInputD = false;
     sf::String stringDisplayD;
@@ -40,6 +45,7 @@ int main(int argc, char* const argv[])
     textDisplayD.setPosition(300, 480);
     textDisplayD.setString("Description");
     bool firstClickD = true;
+    int textTrackerD = 0;
 
     bool takeInputP = false;
     sf::String stringDisplayP;
@@ -50,6 +56,7 @@ int main(int argc, char* const argv[])
     textDisplayP.setPosition(300, 630);
     textDisplayP.setString("Password?");
     bool firstClickP = true;
+    int textTrackerP = 0;
 
     bool takeInputT = false;
     sf::String stringDisplayT;
@@ -60,6 +67,7 @@ int main(int argc, char* const argv[])
     textDisplayT.setPosition(300, 780);
     textDisplayT.setString("Time");
     bool firstClickT = true;
+    int textTrackerT = 0;
 
 
     sf::String stringDisplayU;
@@ -154,7 +162,7 @@ int main(int argc, char* const argv[])
                                 userBoxOpen = false;
                                 userWindow.close();
                                 window.create(sf::VideoMode(1480, 1024), "Link Logger");
-                                linkLogger* meetingList = new linkLogger(userProfParameter);
+                                meetingList = new linkLogger(userProfParameter);
                             }
                         }
                         //clearing the box if something other than the SAVE button or textbox was clicked
@@ -243,7 +251,7 @@ int main(int argc, char* const argv[])
                             userBoxOpen = false;
                             userWindow.close();
                             window.create(sf::VideoMode(1480, 1024), "Link Logger");
-                            linkLogger* meetingList = new linkLogger(userProfParameter);
+                            meetingList = new linkLogger(userProfParameter);
                         }
                     }
                 }
@@ -281,14 +289,26 @@ int main(int argc, char* const argv[])
                     if (SaveClicked.getSprite().getGlobalBounds().contains(mouseP.x, mouseP.y))
                     {
                         CheckSaveClicked = !CheckSaveClicked;
+                        string tempURL = stringDisplayURL;
+                        string tempDesc = stringDisplayD;
+                        string tempTime = stringDisplayT;
+                        string tempPass = stringDisplayP;
+                        string tempDate = "Monday for now fix later!";
+                        meetingList->insertMeeting(tempURL, tempDesc, tempTime, tempDate, tempPass);
+                        stringDisplayP = "";
+                        stringDisplayT = "";
+                        stringDisplayD = "";
+                        stringDisplayURL = "";
                     }
 
                     if (CheckClickedAddLink)
                     {
                         //IF IT IS NOT CLICKED
                         if (!LinkAdressInsert.getSprite().getGlobalBounds().contains(mouseP.x, mouseP.y))
+                        {
                             takeInputURL = false;
-                        //IF THE SEARCH BAR IS CLICKED
+                            textTrackerURL = 0;
+                        }                        //IF THE SEARCH BAR IS CLICKED
                         else if (LinkAdressInsert.getSprite().getGlobalBounds().contains(mouseP.x, mouseP.y))
                         {
                             takeInputURL = true;
@@ -302,8 +322,10 @@ int main(int argc, char* const argv[])
 
                         //IF IT IS NOT CLICKED, RESET THE SEARCH BAR
                         if (!Description.getSprite().getGlobalBounds().contains(mouseP.x, mouseP.y))
+                        {
                             takeInputD = false;
-                        //IF THE SEARCH BAR IS CLICKED, CLEAR IT AND BEGIN ALLOWING KEYBOARD INPUT TO BE TAKEN IN
+                            textTrackerD = 0;
+                        }                        //IF THE SEARCH BAR IS CLICKED, CLEAR IT AND BEGIN ALLOWING KEYBOARD INPUT TO BE TAKEN IN
                         else if (Description.getSprite().getGlobalBounds().contains(mouseP.x, mouseP.y))
                         {
                             takeInputD = true;
@@ -316,7 +338,10 @@ int main(int argc, char* const argv[])
 
                         //IF IT IS NOT CLICKED, RESET THE SEARCH BAR
                         if (!Password.getSprite().getGlobalBounds().contains(mouseP.x, mouseP.y))
+                        {
                             takeInputP = false;
+                            textTrackerP = 0;
+                        }
                         //IF THE SEARCH BAR IS CLICKED, CLEAR IT AND BEGIN ALLOWING KEYBOARD INPUT TO BE TAKEN IN
                         else if (Password.getSprite().getGlobalBounds().contains(mouseP.x, mouseP.y))
                         {
@@ -330,8 +355,10 @@ int main(int argc, char* const argv[])
 
                         //IF IT IS NOT CLICKED, RESET THE SEARCH BAR
                         if (!Time.getSprite().getGlobalBounds().contains(mouseP.x, mouseP.y))
+                        {
                             takeInputT = false;
-                        //IF THE SEARCH BAR IS CLICKED, CLEAR IT AND BEGIN ALLOWING KEYBOARD INPUT TO BE TAKEN IN
+                            textTrackerT = 0;
+                        }                        //IF THE SEARCH BAR IS CLICKED, CLEAR IT AND BEGIN ALLOWING KEYBOARD INPUT TO BE TAKEN IN
                         else if (Time.getSprite().getGlobalBounds().contains(mouseP.x, mouseP.y))
                         {
                             takeInputT = true;
@@ -354,7 +381,15 @@ int main(int argc, char* const argv[])
                     if (event.text.unicode >= 32 && event.text.unicode <= 127)
                     {
                         stringDisplayURL += event.text.unicode;
-                        textDisplayURL.setString(stringDisplayURL);
+                        textDisplayURL.setString(stringDisplayURL.substring(textTrackerURL, stringDisplayURL.getSize()));
+                        //allows for the text to wrap in the textbox so if the string gets larger than the textbox, the first character will not be displayed until it fits in the textbox
+                        while (textDisplayURL.getLocalBounds().width >= LinkAdressInsert.getSprite().getLocalBounds().width - 100)
+                        {
+                            textTrackerURL++;
+                            string tempString = textDisplayURL.getString();
+                            tempString = stringDisplayURL.substring(textTrackerURL, tempString.size());
+                            textDisplayURL.setString(tempString);
+                        }
                     }
                     //CHECKING FOR BACKSPACE, WHICH DELETES THE LAST CHARACTER TYPED IF THERE IS A LETTER IN THE SEARCH BAR
                     else if (event.text.unicode == 8)
@@ -363,6 +398,13 @@ int main(int argc, char* const argv[])
                         {
                             stringDisplayURL.erase(stringDisplayURL.getSize() - 1, 1);
                             textDisplayURL.setString(stringDisplayURL);
+                        }
+                        if (textTrackerURL > 0) //if characters have been wrapped, so text tracker is larger than its default, then we will decrease text tracker so that the string unwraps
+                        {
+                            textTrackerURL--;
+                            string tempString = textDisplayURL.getString();
+                            tempString = stringDisplayURL.substring(textTrackerURL, tempString.size());
+                            textDisplayURL.setString(tempString);
                         }
                     }
                 }
@@ -373,7 +415,15 @@ int main(int argc, char* const argv[])
                     if (event.text.unicode >= 32 && event.text.unicode <= 127)
                     {
                         stringDisplayD += event.text.unicode;
-                        textDisplayD.setString(stringDisplayD);
+                        textDisplayD.setString(stringDisplayD.substring(textTrackerD, stringDisplayD.getSize()));
+                        //allows for the text to wrap in the textbox so if the string gets larger than the textbox, the first character will not be displayed until it fits in the textbox
+                        while (textDisplayD.getLocalBounds().width >= Description.getSprite().getLocalBounds().width - 100)
+                        {
+                            textTrackerD++;
+                            string tempString = textDisplayD.getString();
+                            tempString = stringDisplayD.substring(textTrackerD, tempString.size());
+                            textDisplayD.setString(tempString);
+                        }
                     }
                     //CHECKING FOR BACKSPACE, WHICH DELETES THE LAST CHARACTER TYPED IF THERE IS A LETTER IN THE SEARCH BAR
                     else if (event.text.unicode == 8)
@@ -382,6 +432,13 @@ int main(int argc, char* const argv[])
                         {
                             stringDisplayD.erase(stringDisplayD.getSize() - 1, 1);
                             textDisplayD.setString(stringDisplayD);
+                        }
+                        if (textTrackerD > 0) //if characters have been wrapped, so text tracker is larger than its default, then we will decrease text tracker so that the string unwraps
+                        {
+                            textTrackerD--;
+                            string tempString = textDisplayD.getString();
+                            tempString = stringDisplayD.substring(textTrackerD, tempString.size());
+                            textDisplayD.setString(tempString);
                         }
                     }
                 }
@@ -392,7 +449,15 @@ int main(int argc, char* const argv[])
                     if (event.text.unicode >= 32 && event.text.unicode <= 127)
                     {
                         stringDisplayP += event.text.unicode;
-                        textDisplayP.setString(stringDisplayP);
+                        textDisplayP.setString(stringDisplayP.substring(textTrackerP, stringDisplayP.getSize()));
+                        //allows for the text to wrap in the textbox so if the string gets larger than the textbox, the first character will not be displayed until it fits in the textbox
+                        while (textDisplayP.getLocalBounds().width >= Password.getSprite().getLocalBounds().width - 100)
+                        {
+                            textTrackerP++;
+                            string tempString = textDisplayP.getString();
+                            tempString = stringDisplayP.substring(textTrackerP, tempString.size());
+                            textDisplayP.setString(tempString);
+                        }
                     }
                     //CHECKING FOR BACKSPACE, WHICH DELETES THE LAST CHARACTER TYPED IF THERE IS A LETTER IN THE SEARCH BAR
                     else if (event.text.unicode == 8)
@@ -401,6 +466,13 @@ int main(int argc, char* const argv[])
                         {
                             stringDisplayP.erase(stringDisplayP.getSize() - 1, 1);
                             textDisplayP.setString(stringDisplayP);
+                        }
+                        if (textTrackerP > 0) //if characters have been wrapped, so text tracker is larger than its default, then we will decrease text tracker so that the string unwraps
+                        {
+                            textTrackerP--;
+                            string tempString = textDisplayP.getString();
+                            tempString = stringDisplayP.substring(textTrackerP, tempString.size());
+                            textDisplayP.setString(tempString);
                         }
                     }
                 }
@@ -411,7 +483,15 @@ int main(int argc, char* const argv[])
                     if (event.text.unicode >= 32 && event.text.unicode <= 127)
                     {
                         stringDisplayT += event.text.unicode;
-                        textDisplayT.setString(stringDisplayT);
+                        textDisplayT.setString(stringDisplayT.substring(textTrackerT, stringDisplayT.getSize()));
+                        //allows for the text to wrap in the textbox so if the string gets larger than the textbox, the first character will not be displayed until it fits in the textbox
+                        while (textDisplayT.getLocalBounds().width >= Time.getSprite().getLocalBounds().width - 100)
+                        {
+                            textTrackerT++;
+                            string tempString = textDisplayT.getString();
+                            tempString = stringDisplayT.substring(textTrackerT, tempString.size());
+                            textDisplayT.setString(tempString);
+                        }
                     }
                     //CHECKING FOR BACKSPACE, WHICH DELETES THE LAST CHARACTER TYPED IF THERE IS A LETTER IN THE SEARCH BAR
                     else if (event.text.unicode == 8)
@@ -420,6 +500,13 @@ int main(int argc, char* const argv[])
                         {
                             stringDisplayT.erase(stringDisplayT.getSize() - 1, 1);
                             textDisplayT.setString(stringDisplayT);
+                        }
+                        if (textTrackerT > 0) //if characters have been wrapped, so text tracker is larger than its default, then we will decrease text tracker so that the string unwraps
+                        {
+                            textTrackerT--;
+                            string tempString = textDisplayT.getString();
+                            tempString = stringDisplayT.substring(textTrackerT, tempString.size());
+                            textDisplayT.setString(tempString);
                         }
                     }
                 }
