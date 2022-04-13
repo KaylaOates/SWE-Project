@@ -18,6 +18,28 @@ linkLogger::linkLogger(string user_)
 	this->cnt = 0;
 	user_ = "csv/" + user_ + ".csv";
 	user = user_;
+	fstream linksCSV(user);
+	string token;
+	if (linksCSV.is_open())
+	{
+		while (getline(linksCSV, token))
+		{
+			meeting* tempMeeting = new meeting();
+			istringstream tempStringS(token);
+			string temp;
+			getline(tempStringS, temp, ',');
+			tempMeeting->setURL(temp);
+			getline(tempStringS, temp, ',');
+			tempMeeting->setInfo(temp);
+			getline(tempStringS, temp, ',');
+			tempMeeting->setDate(temp);
+			getline(tempStringS, temp, ',');
+			tempMeeting->setTime(temp);
+			getline(tempStringS, temp, ',');
+			tempMeeting->setPassword(temp);
+			this->list.push_back(tempMeeting);
+		}
+	}
 }
 
 linkLogger::~linkLogger()//desructor
@@ -73,8 +95,8 @@ void linkLogger::updateCSV()
 			temp.append(list[i]->getDate());
 			temp.append(",");
 			temp.append(list[i]->getTime());
-      temp.append(",");
-      temp.append(list[i]->getPassword());
+			temp.append(",");
+			temp.append(list[i]->getPassword());
 			temp.append(",\n");
 			linksCSV << temp;
 		}
@@ -92,7 +114,7 @@ void linkLogger::insertMeeting(string url, string info, string time, string date
 	cnt = cnt + 1;
 	meeting* newMeeting = new meeting(url, info, time, date,password);
 	list.push_back(newMeeting);
-  this->addLink(newMeeting);
+	updateCSV();
 }
 
 meeting* linkLogger::getMeeting(string url_)
