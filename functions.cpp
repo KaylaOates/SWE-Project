@@ -6,7 +6,9 @@ bool compareFile(istreambuf_iterator<char> file1B, istreambuf_iterator<char> fil
     while (file1B != file1E && file2B != file2E)
     {
         if (*file1B != *file2B)
-        { return false; }
+        { 
+            return false; 
+        }
         ++file1B;
         ++file2B;
     }
