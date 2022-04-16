@@ -8,6 +8,8 @@
 ///////////////////////////////////TODO: MAKE SURE THE CSV WRITING WORKS PROPERLY AND THE LINKLOGGER GRABS THE MEETINGS IN THE CSV AND ADDS THEM TO ITS VECTOR IN THE CONSTRUCTOR.////////////////////////////////////////////////////////
 
 
+//making changes now
+
 int main(int argc, char* const argv[])
 {
 	
