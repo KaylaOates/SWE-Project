@@ -1,25 +1,26 @@
 #define CATCH_CONFIG_RUNNER
+#include "Notification.h"
 #include "catch2/catch.hpp"
 #include "TextBox.cpp"
 #include "LinkLogger.h"
+#include <set>
 #include "functions.h"
 #include <SFML/Graphics.hpp>
 #include <stdlib.h> 
-///////////////////////////////////TODO: MAKE SURE THE CSV WRITING WORKS PROPERLY AND THE LINKLOGGER GRABS THE MEETINGS IN THE CSV AND ADDS THEM TO ITS VECTOR IN THE CONSTRUCTOR.////////////////////////////////////////////////////////
 
 
 int main(int argc, char* const argv[])
 {
-	
 
-	
 	//declare all window, shape, text, font objects here
     sf::RenderWindow window;
     sf::RenderWindow userWindow(sf::VideoMode(600, 480), "Select User Profile");
-    bool userBoxOpen = true;
+    bool userBoxOpen = true;   
+    sf::RenderWindow notificationWindow;
+    bool notiBoxOpen = false;
     linkLogger tempLinkLogger = linkLogger();
     linkLogger* meetingList = &tempLinkLogger;
-
+    set<meeting*> notifications; //USE THIS TO TURN ON AND OFF THE ALARM;
     //-----------------------------------------------------TEXT BOXES------------------------------------------------------------//
 
     sf::Font font;
@@ -80,6 +81,15 @@ int main(int argc, char* const argv[])
     textDisplayU.setString("User Profile Name");
     bool firstClickU = true;
 
+    sf::Text textDisplayNoti;
+    textDisplayNoti.setFont(font);
+    textDisplayNoti.setCharacterSize(25);
+    textDisplayNoti.setStyle(sf::Text::Bold);
+    textDisplayNoti.setStyle(sf::Text::Underlined);
+    textDisplayNoti.setFillColor(sf::Color::Red);
+    textDisplayNoti.setOutlineThickness(2);
+
+
     //-----------------------------------------------------IMAGE IMPORTS---------------------------------------------------------//
 
     ImportImage Background("Background", -58, -58);
@@ -107,14 +117,37 @@ int main(int argc, char* const argv[])
     bool saveClicked2U = false;
     
     
-    
-    
+    /////////////////////////////////////////////////////////////FOR TESTING NOTIFICATION WINDOW PURPOSES ONLY DELETE WHEN DONE!///////////////////////////////////////////////////////////
+    bool notiWindow = true;
+
     //---------------------------------------------------------------MAIN PROGRAM LOOP-------------------------------------------------------------------//
     bool testRan = false;
     int textTracker = 0;
+    notiWindow = true;
 
-    while (window.isOpen() || userWindow.isOpen())
+    while (window.isOpen() || userWindow.isOpen() || notificationWindow.isOpen())
     {
+        meeting* alertMeeting = meetingList->checkMeetingAlerts();
+        if (alertMeeting != nullptr)
+        {
+            notifications.insert(alertMeeting); //SO I WANT TO USE WHAT IS IN THE SET, IF THERE IS SOMETHING, HAVE THE ALARM GO OFF UNTIL THE USER CLICKS THE TURN OFF BUTTON. THEN WHEN THE TURN OFF BUTTON IS PRESSED, USE DISALLOWNOISE(), WAIT 5 MINUTES AND USE ALLOWNOISE()
+        }
+        if (notifications.size() > 0 && !userBoxOpen)
+        {
+            auto it = notifications.begin();
+            meeting* tempMeetingPtr = *it;
+            notiBoxOpen = true;
+            textDisplayNoti.setString(tempMeetingPtr->getInfo());
+            auto boxSize = textDisplayNoti.getGlobalBounds();
+            int boxWidth = 250 - ((boxSize.width) / 2);
+            textDisplayNoti.setPosition(boxWidth, 25);
+            if (notiWindow)
+            {
+                notificationWindow.create(sf::VideoMode(500, 100), "Meeting Time!");
+                notiWindow = false;
+            }
+        }
+
         sf::Event event;
         if (userBoxOpen)
         {
@@ -257,6 +290,49 @@ int main(int argc, char* const argv[])
                 }
             }
         }
+        if (notiBoxOpen)
+        {
+            while (notificationWindow.pollEvent(event))
+            {
+                if (event.type == sf::Event::Closed)
+                {
+                    notificationWindow.close();
+                    notiBoxOpen = false;
+                    if (notifications.size() > 0 && !userBoxOpen)
+                    {
+                        
+                        auto it = notifications.begin();
+                        meeting* tempMeetingPtr = *it;
+                        tempMeetingPtr->allow_Noise();
+                        notifications.clear();
+                    }
+                }
+                sf::Vector2i mouseP = sf::Mouse::getPosition(notificationWindow);
+                if (event.type == sf::Event::MouseButtonPressed)
+                {
+                    if (event.mouseButton.button == sf::Mouse::Left)
+                    {
+                        if (textDisplayNoti.getGlobalBounds().contains(mouseP.x, mouseP.y))
+                        {
+                            auto it = notifications.begin();
+                            meeting* tempMeetingPtr = *it;
+                            meetingList->openURL(tempMeetingPtr->getURL());
+                            tempMeetingPtr->disallowNoise();
+                            notiBoxOpen = false;
+                            OpenClipboard(0);
+                            EmptyClipboard();
+                            auto data = GlobalAlloc(GMEM_FIXED, 32);
+                            string tempString = tempMeetingPtr->getPassword();
+                            const char* tempC = tempString.c_str();
+                            memcpy(data, tempC, tempString.size()+1);
+                            SetClipboardData(CF_TEXT, data);
+                            CloseClipboard();
+                        }
+                    }
+
+                }
+            }
+        }
         while (window.pollEvent(event))
         {
             
@@ -293,8 +369,7 @@ int main(int argc, char* const argv[])
                         string tempDesc = stringDisplayD;
                         string tempTime = stringDisplayT;
                         string tempPass = stringDisplayP;
-                        string tempDate = "Monday for now fix later!";
-                        meetingList->insertMeeting(tempURL, tempDesc, tempTime, tempDate, tempPass);
+                        meetingList->insertMeeting(tempURL, tempDesc, tempTime, tempPass);
                         stringDisplayP = "";
                         stringDisplayT = "";
                         stringDisplayD = "";
@@ -584,6 +659,13 @@ int main(int argc, char* const argv[])
             }
             userWindow.draw(textDisplayU);
             userWindow.display();
+        }
+        if (notiBoxOpen && !userBoxOpen)
+        {
+            notificationWindow.clear(sf::Color::White);
+            notificationWindow.draw(textDisplayNoti);
+            notificationWindow.display();
+
         }
 
         window.display();

@@ -38,6 +38,7 @@ linkLogger::linkLogger(string user_)
 			getline(tempStringS, temp, ',');
 			tempMeeting->setPassword(temp);
 			this->list.push_back(tempMeeting);
+			cnt++;
 		}
 	}
 }
@@ -104,15 +105,15 @@ void linkLogger::updateCSV()
 	linksCSV.close();
 }
 
-void linkLogger::openURL(string& URL)
+void linkLogger::openURL(string URL)
 {
 	ShellExecuteA(NULL, "open", URL.c_str(), NULL, NULL, SW_SHOWNORMAL);
 }
 
-void linkLogger::insertMeeting(string url, string info, string time, string date,string password)
+void linkLogger::insertMeeting(string url, string info, string time ,string password)
 {
 	cnt = cnt + 1;
-	meeting* newMeeting = new meeting(url, info, time, date,password);
+	meeting* newMeeting = new meeting(url, info, time,password);
 	list.push_back(newMeeting);
 	updateCSV();
 }
@@ -125,6 +126,16 @@ meeting* linkLogger::getMeeting(string url_)
 		{
 			return list[i];
 		}
+	}
+	return nullptr;
+}
+meeting* linkLogger::checkMeetingAlerts()
+{
+	for (int i = 0; i < cnt; i++)
+	{
+		bool tempB = list[i]->checkAlert();
+		if (tempB == true)
+			return list[i];
 	}
 	return nullptr;
 }
@@ -182,4 +193,28 @@ string meeting::getPassword()
 {
 	return password;
 }
+void meeting::playAlarm()
+{
+	if(allowNoise == true)
+		Beep(350, 1000);
+}
+bool meeting::checkAlert()
+{
+	alert.getTime(time);
+	bool alertChecker = alert.start_noti(date);
+	if (alertChecker == true)
+	{
+		playAlarm();
+		return true;
+	}
+	return false;
+}
 
+void meeting::disallowNoise()
+{
+	allowNoise = false;
+}
+void meeting::allow_Noise()
+{
+	allowNoise = true;
+}

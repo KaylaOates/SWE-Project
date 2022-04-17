@@ -14,22 +14,24 @@ TEST_CASE("Testing removal behaviour")
 {
 	SECTION("Testing 1 normal removal of link to empty")
 	{
+		remove("csv/test.csv");
 		linkLogger* meetingList = new linkLogger("test");
 		//insert and remove 1 link
-		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198187", "test", "0;00", "00/00/0000", "123");
+		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198187", "test", "5:00 pm monday", "123");
 		meetingList->removeLink(meetingList->getMeeting("https://ufl.zoom.us/j/99700198187"));
 		ifstream linkCSV(meetingList->getUser());
 		REQUIRE(linkCSV.peek() == EOF); //first entry of the file should be the end-of-file
 	}
 	SECTION("Testing 1 normal removal of link from 5 total")
 	{
+		remove("csv/test.csv");
 		linkLogger* meetingList = new linkLogger("test");
 		//insert 5 links and remove one of them
-		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198181", "test", "0;00", "00/00/0000", "123");
-		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198182", "test", "0;00", "00/00/0000", "123");
-		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198183", "test", "0;00", "00/00/0000", "123");
-		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198184", "test", "0;00", "00/00/0000", "123");
-		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198185", "test", "0;00", "00/00/0000", "123");
+		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198181", "test", "5:00 pm monday", "123");
+		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198182", "test", "5:00 pm monday", "123");
+		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198183", "test", "5:00 pm monday" , "123");
+		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198184", "test", "5:00 pm monday" , "123");
+		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198185", "test", "5:00 pm monday" , "123");
 		meetingList->removeLink(meetingList->getMeeting("https://ufl.zoom.us/j/99700198183"));
 
 		//open links.csv and the test file for the first test
@@ -52,13 +54,14 @@ TEST_CASE("Testing removal behaviour")
 	}
 	SECTION("Testing 5 normal removals of link from 5 total")
 	{
+		remove("csv/test.csv");
 		linkLogger* meetingList = new linkLogger("test");
 		//insert 5 links and remove one of them
-		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198181", "test", "0;00", "00/00/0000", "123");
-		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198182", "test", "0;00", "00/00/0000", "123");
-		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198183", "test", "0;00", "00/00/0000", "123");
-		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198184", "test", "0;00", "00/00/0000", "123");
-		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198185", "test", "0;00", "00/00/0000", "123");
+		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198181", "test", "5:00 pm monday" , "123");
+		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198182", "test", "5:00 pm monday" , "123");
+		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198183", "test", "5:00 pm monday" , "123");
+		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198184", "test", "5:00 pm monday" , "123");
+		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198185", "test", "5:00 pm monday" , "123");
 
 		meetingList->removeLink(meetingList->getMeeting("https://ufl.zoom.us/j/99700198181"));
 		meetingList->removeLink(meetingList->getMeeting("https://ufl.zoom.us/j/99700198182"));
@@ -72,13 +75,14 @@ TEST_CASE("Testing removal behaviour")
 	}
 	SECTION("Testing removal of edge links from 5 total")
 	{
+		remove("csv/test.csv");
 		linkLogger* meetingList = new linkLogger("test");
 		//insert 5 links and remove one of them
-		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198181", "test", "0;00", "00/00/0000", "123");
-		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198182", "test", "0;00", "00/00/0000", "123");
-		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198183", "test", "0;00", "00/00/0000", "123");
-		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198184", "test", "0;00", "00/00/0000", "123");
-		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198185", "test", "0;00", "00/00/0000", "123");
+		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198181", "test", "5:00 pm monday" , "123");
+		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198182", "test", "5:00 pm monday" , "123");
+		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198183", "test", "5:00 pm monday" , "123");
+		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198184", "test", "5:00 pm monday" , "123");
+		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198185", "test", "5:00 pm monday" , "123");
 
 		meetingList->removeLink(meetingList->getMeeting("https://ufl.zoom.us/j/99700198181"));
 		meetingList->removeLink(meetingList->getMeeting("https://ufl.zoom.us/j/99700198185"));
@@ -103,6 +107,7 @@ TEST_CASE("Testing removal behaviour")
 	}
 	SECTION("Testing removal of 1 links from 0 total")
 	{
+		remove("csv/test.csv");
 		linkLogger* meetingList = new linkLogger("test");
 		//remove from empty linkLogger
 
@@ -110,7 +115,7 @@ TEST_CASE("Testing removal behaviour")
 		ifstream linkCSV(meetingList->getUser());
 		bool test2B = true;
 		bool test2 = false;
-		if (linkCSV.peek() == EOF)
+		if (linkCSV.peek() == EOF || !linkCSV.good())
 		{
 			test2B = false;
 		}
@@ -118,16 +123,6 @@ TEST_CASE("Testing removal behaviour")
 		{
 			test2 = true;
 		}
-		REQUIRE(test2 == false);
-	}
-
-}
-TEST_CASE("Testing Get function")
-{
-	SECTION("Testing get url") {
-		linkLogger* meetingList = new linkLogger("test");
-		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198181", "test", "0;00", "00/00/0000", "123");
-		string get_url = meetingList->getMeeting("https://ufl.zoom.us/j/99700198181")->getURL();
-		REQUIRE(get_url == "https://ufl.zoom.us/j/99700198181");
+		REQUIRE(test2 == true);
 	}
 }
