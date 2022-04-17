@@ -91,25 +91,26 @@ int main(int argc, char* const argv[])
 
 
     //-----------------------------------------------------IMAGE IMPORTS---------------------------------------------------------//
-
+	
     ImportImage Background("Background", -58, -58);
     ImportImage NoLogoBackground("NoLogoBackground", -58, -58);
     ImportImage AddLink("AddLink", 520, 30);
     ImportImage ClickedAddLink("ClickedAddLink", 520, 30);
-    bool CheckClickedAddLink = false;
+        bool CheckClickedAddLink = false;
     ImportImage CalendarView("CalendarView", 990, 30);
     ImportImage ClickedCalendarView("ClickedCalendarView", 990, 30);
-    bool CheckClickedCalendarView = false;
+        bool CheckClickedCalendarView = false;
     ImportImage ListView("ListView", 50, 30);
+    ImportImage ListViewBackground("ListViewBackground", 105, 280);
     ImportImage ClickedListView("ClickedListView", 50, 30);
-    bool CheckClickedListView = false;
+        bool CheckClickedListView = false;
     ImportImage LinkAdressInsert("LinkAdressInsert", 220, 300);
     ImportImage Description("Description", 220, 450);
     ImportImage Password("Password", 220, 600);
     ImportImage Time("Time", 220, 750);
     ImportImage SaveUnclicked("SaveUnclicked", 600, 885);
     ImportImage SaveClicked("SaveClicked", 600, 885);
-    bool CheckSaveClicked = false;
+        bool CheckSaveClicked = false;
 
     ImportImage userBox("UsersB", 40, 100);
     ImportImage SaveClicked2("SaveUnclicked", 170, 250);
@@ -599,7 +600,57 @@ int main(int argc, char* const argv[])
         if(!CheckClickedListView)
             window.draw(ListView.getSprite());
         else
+         {
             window.draw(ClickedListView.getSprite());
+            window.draw(ListViewBackground.getSprite());
+
+            int numLinks = 3; //THE NUMBER OF MEETING LINKS THAT ARE BEING DISPLAYED
+
+            for (int i = 0; i < numLinks; i++)
+            {
+                sf::Texture Textures;
+                sf::Sprite Sprites;
+                
+                int y = 325 + (i*115);
+
+                Textures.loadFromFile("Images/ListViewDisplay.png");
+                Sprites.setTexture(Textures);
+                Sprites.setPosition(sf::Vector2f(250, y));
+                window.draw(Sprites);
+
+                sf::Text Link;
+                Link.setFont(font);
+                Link.setCharacterSize(30);
+                Link.setFillColor(sf::Color::Black);
+                Link.setPosition(300, y+30);
+                Link.setString("LINK");  /// INSERT LINK HERE TO BE DISPLAYED
+                window.draw(Link);
+
+                sf::Text Name;
+                Name.setFont(font);
+                Name.setCharacterSize(30);
+                Name.setFillColor(sf::Color::Black);
+                Name.setPosition(500, y + 30);
+                Name.setString("NAME");  /// INSERT NAME HERE TO BE DISPLAYED
+                window.draw(Name);
+
+                sf::Text Password;
+                Password.setFont(font);
+                Password.setCharacterSize(30);
+                Password.setFillColor(sf::Color::Black);
+                Password.setPosition(750, y + 30);
+                Password.setString("PASSWORD");  /// INSERT PASSWORD HERE TO BE DISPLAYED
+                window.draw(Password);
+
+                sf::Text Time;
+                Time.setFont(font);
+                Time.setCharacterSize(30);
+                Time.setFillColor(sf::Color::Black);
+                Time.setPosition(1100, y + 30);
+                Time.setString("TIME");  /// INSERT TIME HERE TO BE DISPLAYED
+                window.draw(Time);
+            }
+        }
 
         if (!CheckClickedAddLink)
             window.draw(AddLink.getSprite());
