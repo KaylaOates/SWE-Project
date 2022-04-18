@@ -136,3 +136,35 @@ TEST_CASE("Testing Get function")
 		REQUIRE(get_url == "https://ufl.zoom.us/j/99700198181");
 	}
 }
+TEST_CASE("Testing Get Time function")
+{
+	SECTION("Testing get time") {
+		remove("csv/test.csv");
+		linkLogger* meetingList = new linkLogger();
+		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198181", "test", "5:00 pm monday", "123");
+		string get_time = meetingList->getMeeting("https://ufl.zoom.us/j/99700198181")->getTime();
+		REQUIRE(get_time == "5:00 pm monday");
+	}
+}
+
+TEST_CASE("Testing Get Info function")
+{
+	SECTION("Testing get info") {
+		remove("csv/test.csv");
+		linkLogger* meetingList = new linkLogger();
+		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198181", "test", "5:00 pm monday", "123");
+		string get_info = meetingList->getMeeting("https://ufl.zoom.us/j/99700198181")->getInfo();
+		REQUIRE(get_info == "test");
+	}
+}
+
+TEST_CASE("Testing Get Password function")
+{
+	SECTION("Testing get password") {
+		remove("csv/test.csv");
+		linkLogger* meetingList = new linkLogger();
+		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198181", "test", "5:00 pm monday", "123");
+		string get_pass = meetingList->getMeeting("https://ufl.zoom.us/j/99700198181")->getPassword();
+		REQUIRE(get_pass == "123");
+	}
+}
