@@ -60,7 +60,6 @@ bool Notification::start_noti(string date)
     current = *localtime(&now);
     string ans;
     timeDiffer();
-    cout << "TIME REMAINING:    " << diff.tm_hour << ":" << diff.tm_min << ":" << diff.tm_sec << endl;
     string day = todayDay(diff.tm_wday);
     for (int i = 0; i < date.size(); i++)
     {

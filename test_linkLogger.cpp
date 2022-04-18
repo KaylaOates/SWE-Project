@@ -126,3 +126,13 @@ TEST_CASE("Testing removal behaviour")
 		REQUIRE(test2 == true);
 	}
 }
+TEST_CASE("Testing Get function")
+{
+	SECTION("Testing get url") {
+		remove("csv/test.csv");
+		linkLogger* meetingList = new linkLogger();
+		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198181", "test", "5:00 pm monday", "123");
+		string get_url = meetingList->getMeeting("https://ufl.zoom.us/j/99700198181")->getURL();
+		REQUIRE(get_url == "https://ufl.zoom.us/j/99700198181");
+	}
+}
