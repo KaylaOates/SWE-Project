@@ -113,7 +113,7 @@ void linkLogger::openURL(string URL)
 
 void linkLogger::insertMeeting(string url, string info, string time, string password)
 {
-	if (time.size() != 14 && time.size() != 15)
+	if (time.size() < 14 || time.size() > 18)
 		return;
 	cnt = cnt + 1;
 	meeting* newMeeting = new meeting(url, info, time,password);
