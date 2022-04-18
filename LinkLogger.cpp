@@ -37,6 +37,7 @@ linkLogger::linkLogger(string user_)
 			tempMeeting->setTime(temp);
 			getline(tempStringS, temp, ',');
 			tempMeeting->setPassword(temp);
+			tempMeeting->setMtime();
 			this->list.push_back(tempMeeting);
 			cnt++;
 		}
@@ -56,7 +57,7 @@ bool linkLogger::removeLink(meeting* link) //Remove a link by going through the 
 	//find the link to be deleted and then remove it from the linkLogger
 	for (int i = 0; i < cnt; i++)
 	{
-		if (list[i]->getURL() == link->getURL())
+		if (list[i] == link)
 		{
 			list.erase(list.begin() + i);
 			cnt--;
@@ -110,8 +111,10 @@ void linkLogger::openURL(string URL)
 	ShellExecuteA(NULL, "open", URL.c_str(), NULL, NULL, SW_SHOWNORMAL);
 }
 
-void linkLogger::insertMeeting(string url, string info, string time ,string password)
+void linkLogger::insertMeeting(string url, string info, string time, string password)
 {
+	if (time.size() != 14 || time.size() != 15)
+		return;
 	cnt = cnt + 1;
 	meeting* newMeeting = new meeting(url, info, time,password);
 	list.push_back(newMeeting);
@@ -147,6 +150,11 @@ unsigned int linkLogger::getCount()
 string linkLogger::getUser()
 {
 	return user;
+}
+
+meeting* linkLogger::getMeetingInt(int i)
+{
+	return list[i];
 }
 
 void meeting::setURL(string newUrl)
@@ -217,4 +225,50 @@ void meeting::disallowNoise()
 void meeting::allow_Noise()
 {
 	allowNoise = true;
+}
+float meeting::getMTime()
+{
+	return mTime;
+}
+void meeting::setMtime()
+{
+	if (this->time.substr(this->time.size() - 2, 2) == "pm" || this->time.substr(this->time.size() - 2, 2) == "PM" || this->time.substr(this->time.size() - 2, 2) == "Pm" || this->time.substr(this->time.size() - 2, 2) == "pM")
+	{
+		string tempS = this->time.substr(0, this->time.size() - 3);
+		string timeString = "";
+		int j = 0;
+		for (; j < tempS.size(); j++)
+		{
+			if (tempS[j] == ':')
+				break;
+			timeString += tempS[j];
+		}
+
+		int temp = stoi(timeString);
+		temp += 12;
+		if (temp == 24)
+			temp = 12;
+		mTime = temp;
+		float tempF = stof(tempS.substr(j + 1, 2));
+		mTime += (tempF / 60);
+	}
+	else
+	{
+		string tempS = this->time.substr(0, time.size() - 2);
+		string timeString = "";
+		int j = 0;
+		for (; j < tempS.size(); j++)
+		{
+			if (tempS[j] == ':')
+				break;
+			timeString += tempS[j];
+		}
+
+		int temp = stoi(timeString);
+		if (temp == 12)
+			temp = 0;
+		mTime = temp;
+		float tempF = stof(tempS.substr(j + 1, 2));
+		mTime += (tempF / 60);
+	}
 }

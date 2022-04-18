@@ -7,6 +7,8 @@
 #include "functions.h"
 #include <SFML/Graphics.hpp>
 #include <stdlib.h> 
+#include <random>
+#include <chrono>
 
 
 int main(int argc, char* const argv[])
@@ -17,9 +19,31 @@ int main(int argc, char* const argv[])
     sf::RenderWindow userWindow(sf::VideoMode(600, 480), "Select User Profile");
     bool userBoxOpen = true;   
     sf::RenderWindow notificationWindow;
+    vector<sf::CircleShape*> removeButtons;
     bool notiBoxOpen = false;
     linkLogger tempLinkLogger = linkLogger();
     linkLogger* meetingList = &tempLinkLogger;
+    random_device dev;
+    mt19937::result_type seed = dev() ^(
+        (std::mt19937::result_type)
+        std::chrono::duration_cast<std::chrono::seconds>(
+            std::chrono::system_clock::now().time_since_epoch()
+            ).count() +
+        (std::mt19937::result_type)
+        std::chrono::duration_cast<std::chrono::microseconds>(
+            std::chrono::high_resolution_clock::now().time_since_epoch()
+            ).count());
+    mt19937 rng(seed);
+    uniform_int_distribution<mt19937::result_type> color1(100, 235);
+    uniform_int_distribution<mt19937::result_type> color3(0, 150);
+
+
+    int colorStart = color3(rng);
+    vector<int> colors;
+    for (int k = 0; k < 1000; k++)
+    {
+        colors.push_back(color1(rng));
+    }
     set<meeting*> notifications; //USE THIS TO TURN ON AND OFF THE ALARM;
     //-----------------------------------------------------TEXT BOXES------------------------------------------------------------//
 
@@ -33,9 +57,11 @@ int main(int argc, char* const argv[])
     textDisplayURL.setCharacterSize(30);
     textDisplayURL.setFillColor(sf::Color::Black);
     textDisplayURL.setPosition(300, 330);
-    textDisplayURL.setString("Insert URL");
+    textDisplayURL.setString("Insert URL (Include www.)");
     bool firstClickURL = true;
     int textTrackerURL = 0;
+
+    int removeBTracker = 0;
 
     bool takeInputD = false;
     sf::String stringDisplayD;
@@ -66,7 +92,7 @@ int main(int argc, char* const argv[])
     textDisplayT.setCharacterSize(30);
     textDisplayT.setFillColor(sf::Color::Black);
     textDisplayT.setPosition(300, 780);
-    textDisplayT.setString("Time");
+    textDisplayT.setString("Time(Ex:\"5:00 PM monday\")");
     bool firstClickT = true;
     int textTrackerT = 0;
 
@@ -89,9 +115,22 @@ int main(int argc, char* const argv[])
     textDisplayNoti.setFillColor(sf::Color::Red);
     textDisplayNoti.setOutlineThickness(2);
 
+    sf::CircleShape downButton(30,3);
+    downButton.rotate(180);
+    downButton.setFillColor(sf::Color::Color(73, 73, 73));;
+    downButton.setPosition(1355, 875);
+    downButton.setOutlineColor(sf::Color::Color(231, 231, 231));
+    downButton.setOutlineThickness(3);
+    sf::CircleShape upButton(30, 3);
+    upButton.setFillColor(sf::Color::Color(73, 73, 73));
+    upButton.setPosition(1300, 350);
+    upButton.setOutlineColor(sf::Color::Color(231, 231, 231));
+    upButton.setOutlineThickness(3);
+    
+
 
     //-----------------------------------------------------IMAGE IMPORTS---------------------------------------------------------//
-	
+
     ImportImage Background("Background", -58, -58);
     ImportImage NoLogoBackground("NoLogoBackground", -58, -58);
     ImportImage AddLink("AddLink", 520, 30);
@@ -103,15 +142,16 @@ int main(int argc, char* const argv[])
     ImportImage ListView("ListView", 50, 30);
     ImportImage ListViewBackground("ListViewBackground", 105, 280);
     ImportImage ClickedListView("ClickedListView", 50, 30);
-        bool CheckClickedListView = false;
+    bool CheckClickedListView = false;
     ImportImage LinkAdressInsert("LinkAdressInsert", 220, 300);
     ImportImage Description("Description", 220, 450);
     ImportImage Password("Password", 220, 600);
     ImportImage Time("Time", 220, 750);
     ImportImage SaveUnclicked("SaveUnclicked", 600, 885);
     ImportImage SaveClicked("SaveClicked", 600, 885);
-        bool CheckSaveClicked = false;
-
+    bool CheckSaveClicked = false;
+        
+    ImportImage calendarViewBG("calendarViewBackground", 0, 200);
     ImportImage userBox("UsersB", 40, 100);
     ImportImage SaveClicked2("SaveUnclicked", 170, 250);
     string userProfParameter;
@@ -345,6 +385,35 @@ int main(int argc, char* const argv[])
             {
                 if (event.mouseButton.button == sf::Mouse::Left)
                 {
+                    if (CheckClickedListView)
+                    {
+                        int x = 5;
+                        if (removeButtons.size() < 5)
+                        {
+                            x = removeButtons.size();
+                        }
+                        for (int i = 0; i < x; i++)
+                        {
+                            if (removeButtons[i]->getGlobalBounds().contains(mouseP.x, mouseP.y))
+                            {
+                                meetingList->removeLink(meetingList->getMeetingInt(i+removeBTracker));
+                            }
+                        }
+                        if (downButton.getGlobalBounds().contains(mouseP.x, mouseP.y))
+                        {
+                            removeBTracker++;
+                            if (removeBTracker + 5 > meetingList->getCount())
+                                removeBTracker--;
+                        }
+                        if (upButton.getGlobalBounds().contains(mouseP.x, mouseP.y))
+                        {
+                            removeBTracker--;
+                            if (removeBTracker < 0)
+                                removeBTracker = 0;
+                        }
+                    }
+
+
                     if (ListView.getSprite().getGlobalBounds().contains(mouseP.x, mouseP.y))
                     {
                         CheckClickedListView = !CheckClickedListView;
@@ -446,6 +515,7 @@ int main(int argc, char* const argv[])
                         }
                     }
                 }
+
             }
 
             if (event.type == sf::Event::TextEntered)
@@ -601,17 +671,43 @@ int main(int argc, char* const argv[])
             window.draw(ListView.getSprite());
         else
          {
+            for (int i = 0; i < removeButtons.size(); i++)
+            {
+                delete removeButtons[i];
+            }
             window.draw(ClickedListView.getSprite());
             window.draw(ListViewBackground.getSprite());
 
-            int numLinks = 3; //THE NUMBER OF MEETING LINKS THAT ARE BEING DISPLAYED
+            int numLinks = meetingList->getCount();
+            removeButtons.resize(numLinks);
+            int lastLink = removeBTracker + 5;
+            if (numLinks-removeBTracker < 5)
+            {
+                lastLink = numLinks;
+            }
 
-            for (int i = 0; i < numLinks; i++)
+
+            window.draw(downButton);
+            window.draw(upButton);
+            int i = 0;
+            int j = 0;
+            if (numLinks > 4)
+            {
+                j = removeBTracker;
+            }
+            for (; j < lastLink; j++)
             {
                 sf::Texture Textures;
                 sf::Sprite Sprites;
+                sf::CircleShape* removeButton = new sf::CircleShape();
                 
                 int y = 325 + (i*115);
+
+
+                removeButton->setPosition(270, y + 32);
+                removeButton->setFillColor(sf::Color::Red);
+                removeButton->setRadius(17);
+                removeButtons[i] = removeButton;
 
                 Textures.loadFromFile("Images/ListViewDisplay.png");
                 Sprites.setTexture(Textures);
@@ -622,33 +718,40 @@ int main(int argc, char* const argv[])
                 Link.setFont(font);
                 Link.setCharacterSize(30);
                 Link.setFillColor(sf::Color::Black);
-                Link.setPosition(300, y+30);
-                Link.setString("LINK");  /// INSERT LINK HERE TO BE DISPLAYED
+                Link.setPosition(320, y+30);
+                Link.setString(meetingList->getMeetingInt(j)->getInfo());  /// INSERT LINK HERE TO BE DISPLAYED
                 window.draw(Link);
 
-                sf::Text Name;
-                Name.setFont(font);
-                Name.setCharacterSize(30);
-                Name.setFillColor(sf::Color::Black);
-                Name.setPosition(500, y + 30);
-                Name.setString("NAME");  /// INSERT NAME HERE TO BE DISPLAYED
-                window.draw(Name);
+                sf::Text Date;
+                Date.setFont(font);
+                Date.setCharacterSize(30);
+                Date.setFillColor(sf::Color::Black);
+                Date.setPosition(1090, y + 30);
+                Date.setString(meetingList->getMeetingInt(j)->getDate());  /// INSERT NAME HERE TO BE DISPLAYED
+                window.draw(Date);
 
                 sf::Text Password;
                 Password.setFont(font);
                 Password.setCharacterSize(30);
                 Password.setFillColor(sf::Color::Black);
-                Password.setPosition(750, y + 30);
-                Password.setString("PASSWORD");  /// INSERT PASSWORD HERE TO BE DISPLAYED
+                Password.setPosition(700, y + 30);
+                string passwordString = "No Password";
+                if (meetingList->getMeetingInt(i)->getPassword() != "")
+                    passwordString = meetingList->getMeetingInt(j)->getPassword();
+                Password.setString(passwordString);  /// INSERT PASSWORD HERE TO BE DISPLAYED
                 window.draw(Password);
 
                 sf::Text Time;
                 Time.setFont(font);
                 Time.setCharacterSize(30);
                 Time.setFillColor(sf::Color::Black);
-                Time.setPosition(1100, y + 30);
-                Time.setString("TIME");  /// INSERT TIME HERE TO BE DISPLAYED
+                Time.setPosition(950, y + 30);
+                Time.setString(meetingList->getMeetingInt(j)->getTime());  /// INSERT TIME HERE TO BE DISPLAYED
                 window.draw(Time);
+
+
+                window.draw(*removeButton);
+                i++;
             }
         }
 
@@ -678,9 +781,9 @@ int main(int argc, char* const argv[])
                 firstClickT = true;
                 firstClickD = true;
 
-                textDisplayURL.setString("Insert URL");
+                textDisplayURL.setString("Insert URL (Include www.)");
                 textDisplayP.setString("Password?");
-                textDisplayT.setString("Time");
+                textDisplayT.setString("Time(Ex:\"5:00 PM monday\")");
                 textDisplayD.setString("Description");
 
                 CheckSaveClicked = false;
@@ -698,7 +801,65 @@ int main(int argc, char* const argv[])
         if(!CheckClickedCalendarView)
             window.draw(CalendarView.getSprite());
         else
+        {
             window.draw(ClickedCalendarView.getSprite());
+            window.draw(calendarViewBG.getSprite());
+            int j = 0;
+            float horiDiff = 193.2;
+            float vertDiff = 45.55;
+            for (int i = 0; i < meetingList->getCount(); i++)
+            {
+                int charSize = 50;
+                if (meetingList->getMeetingInt(i)->getDate() == "sunday" || meetingList->getMeetingInt(i)->getDate() == "Sunday" || meetingList->getMeetingInt(i)->getDate() == "SUNDAY")
+                    j = 0;
+                else if (meetingList->getMeetingInt(i)->getDate() == "monday" || meetingList->getMeetingInt(i)->getDate() == "Monday" || meetingList->getMeetingInt(i)->getDate() == "MONDAY")
+                    j = 1;
+                else if (meetingList->getMeetingInt(i)->getDate() == "tuesday" || meetingList->getMeetingInt(i)->getDate() == "Tuesday" || meetingList->getMeetingInt(i)->getDate() == "TUESDAY")
+                    j = 2;
+                else if (meetingList->getMeetingInt(i)->getDate() == "wednesday" || meetingList->getMeetingInt(i)->getDate() == "Wednesday" || meetingList->getMeetingInt(i)->getDate() == "WEDNESDAY")
+                    j = 3;
+                else if (meetingList->getMeetingInt(i)->getDate() == "thursday" || meetingList->getMeetingInt(i)->getDate() == "Thursday" || meetingList->getMeetingInt(i)->getDate() == "THURSDAY")
+                    j = 4;
+                else if (meetingList->getMeetingInt(i)->getDate() == "friday" || meetingList->getMeetingInt(i)->getDate() == "Friday" || meetingList->getMeetingInt(i)->getDate() == "FRIDAY")
+                    j = 5;
+                else if (meetingList->getMeetingInt(i)->getDate() == "saturday" || meetingList->getMeetingInt(i)->getDate() == "Saturday" || meetingList->getMeetingInt(i)->getDate() == "SATURDAY")
+                    j = 6;
+                else
+                    j = 10;
+                float tempF = meetingList->getMeetingInt(i)->getMTime();
+                tempF = tempF - 6;
+                if (tempF < 0 || tempF > 16)
+                    continue;
+
+                sf::RectangleShape linkBox;
+                linkBox.setSize(sf::Vector2f(195, 45));
+                linkBox.setFillColor(sf::Color::Color(colors[colorStart +(1*(i+1))], colors[colorStart +(2 * (i + 1))], colors[colorStart +(3 * (i + 1))]));
+                linkBox.setPosition(114 + j*horiDiff, 241 + tempF*vertDiff);
+
+                sf::Text Link;
+                Link.setFont(font);
+                Link.setCharacterSize(charSize);
+                Link.setFillColor(sf::Color::Black);
+                string tempStringInfo = meetingList->getMeetingInt(i)->getInfo();
+                Link.setString(tempStringInfo);  /// INSERT LINK HERE TO BE DISPLAYED
+                auto boxSize = Link.getGlobalBounds();
+                int boxWidth = 210 - ((boxSize.width) / 2);
+                int boxHeight = 255 - ((boxSize.height) / 2);
+                Link.setPosition(boxWidth + j * horiDiff, boxHeight + tempF * vertDiff);
+
+                while (Link.getLocalBounds().width >= linkBox.getLocalBounds().width || Link.getLocalBounds().height > linkBox.getLocalBounds().height)
+                {
+                    charSize--;
+                    Link.setCharacterSize(charSize);
+                    auto boxSize = Link.getGlobalBounds();
+                    int boxWidth = 210 - ((boxSize.width) / 2);
+                    int boxHeight = 255 - ((boxSize.height) / 2);
+                    Link.setPosition(boxWidth + j * horiDiff, boxHeight + tempF * vertDiff);
+                }
+                window.draw(linkBox);
+                window.draw(Link);
+            }
+        }
         if (userBoxOpen)
         {
             userWindow.clear(sf::Color::White);

@@ -16,6 +16,7 @@ private:
 	string time;
 	string date;
 	string password;
+	float mTime;
 	Notification alert;
 	bool allowNoise;
 public:
@@ -27,7 +28,7 @@ public:
 		for (; i < time.size(); i++)
 		{
 			tempString += time[i];
-			if (time[i] == 'm')
+			if (time[i] == 'm' || time[i] == 'M')
 			{
 				break;
 			}
@@ -38,6 +39,7 @@ public:
 		this->password = password;
 		Notification alert();
 		allowNoise = true;
+		this->setMtime();
 	}
 	meeting()
 	{
@@ -52,11 +54,13 @@ public:
 	void setTime(string newTime);
 	void setDate(string newDate);
 	void setPassword(string password);
+	void setMtime();
 	string getURL();
 	string getInfo();
 	string getTime();
 	string getDate();
 	string getPassword();
+	float getMTime();
 	bool checkAlert();
 	void playAlarm();
 	void disallowNoise();
@@ -82,4 +86,5 @@ public:
 	string getUser();
 	unsigned int getCount();
 	meeting* checkMeetingAlerts();
+	meeting* getMeetingInt(int i);
 };
