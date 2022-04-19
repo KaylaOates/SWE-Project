@@ -73,38 +73,6 @@ TEST_CASE("Testing removal behaviour")
 		ifstream linkCSV(meetingList->getUser());
 		REQUIRE(linkCSV.peek() == EOF); //first entry of the file should be the end-of-file
 	}
-	SECTION("Testing removal of edge links from 5 total")
-	{
-		remove("csv/test.csv");
-		linkLogger* meetingList = new linkLogger("test");
-		//insert 5 links and remove one of them
-		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198181", "test", "5:00 pm monday" , "123");
-		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198182", "test", "5:00 pm monday" , "123");
-		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198183", "test", "5:00 pm monday" , "123");
-		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198184", "test", "5:00 pm monday" , "123");
-		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198185", "test", "5:00 pm monday" , "123");
-
-		meetingList->removeLink(meetingList->getMeeting("https://ufl.zoom.us/j/99700198181"));
-		meetingList->removeLink(meetingList->getMeeting("https://ufl.zoom.us/j/99700198185"));
-
-		//open links.csv and the test file for the first test
-		ifstream linkCSV(meetingList->getUser());
-		ifstream testFile("csvTest/csvTest2.csv");
-
-		//iterators for compareFile function
-		std::istreambuf_iterator<char> file1B(linkCSV);
-		std::istreambuf_iterator<char> file2B(testFile);
-		std::istreambuf_iterator<char> end;
-
-		bool test1A = compareFile(file1B, file2B, end, end); //check if the files are the same
-		bool test1B = false; //bool for checking count
-		if (meetingList->getCount() == 3)
-		{
-			test1B = true;
-		}
-		bool test1 = test1A && test1B; //check if both are true
-		REQUIRE(test1 == true);
-	}
 	SECTION("Testing removal of 1 links from 0 total")
 	{
 		remove("csv/test.csv");
@@ -134,37 +102,5 @@ TEST_CASE("Testing Get function")
 		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198181", "test", "5:00 pm monday", "123");
 		string get_url = meetingList->getMeeting("https://ufl.zoom.us/j/99700198181")->getURL();
 		REQUIRE(get_url == "https://ufl.zoom.us/j/99700198181");
-	}
-}
-TEST_CASE("Testing Get Time function")
-{
-	SECTION("Testing get time") {
-		remove("csv/test.csv");
-		linkLogger* meetingList = new linkLogger();
-		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198181", "test", "5:00 pm monday", "123");
-		string get_time = meetingList->getMeeting("https://ufl.zoom.us/j/99700198181")->getTime();
-		REQUIRE(get_time == "5:00 pm monday");
-	}
-}
-
-TEST_CASE("Testing Get Info function")
-{
-	SECTION("Testing get info") {
-		remove("csv/test.csv");
-		linkLogger* meetingList = new linkLogger();
-		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198181", "test", "5:00 pm monday", "123");
-		string get_info = meetingList->getMeeting("https://ufl.zoom.us/j/99700198181")->getInfo();
-		REQUIRE(get_info == "test");
-	}
-}
-
-TEST_CASE("Testing Get Password function")
-{
-	SECTION("Testing get password") {
-		remove("csv/test.csv");
-		linkLogger* meetingList = new linkLogger();
-		meetingList->insertMeeting("https://ufl.zoom.us/j/99700198181", "test", "5:00 pm monday", "123");
-		string get_pass = meetingList->getMeeting("https://ufl.zoom.us/j/99700198181")->getPassword();
-		REQUIRE(get_pass == "123");
 	}
 }
